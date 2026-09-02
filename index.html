@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/webp" href="icon.webp">
 <title>Portal SMART — SMK Negeri 1 Pogalan</title>
 <meta name="description" content="Pintu masuk ke seluruh sistem informasi SMK Negeri 1 Pogalan.">
 
@@ -111,12 +112,14 @@
   <header class="border-b border-garis/60 bg-ink/60 backdrop-blur-xl">
     <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
       <div class="flex items-center gap-3">
-        <span class="grid h-7 w-7 place-items-center bg-aqua font-mono text-[0.55rem] font-bold text-ink">S1P</span>
+        <img src="icon.webp" class="h-7 w-7">
+            
+        </img>
         <span class="text-[0.8rem] font-medium tracking-tight text-baja">SMK Negeri 1 Pogalan</span>
       </div>
       <div class="flex items-center gap-5 font-mono text-[0.7rem] text-baja">
         <span class="hidden items-center gap-2 sm:flex">
-          <span class="denyut h-1.5 w-1.5 rounded-full bg-aqua text-aqua"></span>Layanan normal
+          <span class="denyut h-1.5 w-1.5 rounded-full bg-aqua text-aqua"></span>Normal
         </span>
         <span id="jam" class="tabular-nums text-teks">--:--:--</span>
       </div>
@@ -130,10 +133,10 @@
       <!-- Ganti kepanjangan SMART sesuai versi resmi sekolah. -->
       <h1 id="wordmark"
           class="masuk font-mono text-4xl font-bold tracking-tighter sm:text-5xl"
-          style="animation-delay:.05s">SMART</h1>
+          style="animation-delay:.05s">SMART PORTAL</h1>
 
       <p class="masuk mx-auto mt-4 max-w-md text-[0.95rem] leading-relaxed text-baja" style="animation-delay:.15s">
-        Pilih layanan yang kamu butuhkan, lalu masuk dengan akun sekolahmu.
+        Layanan Digital SMK Negeri 1 Pogalan
       </p>
 
       <!-- Kolom pencarian tampil otomatis kalau layanan lebih dari 4. -->
@@ -154,7 +157,7 @@
 
   <!-- ===================== KAKI ===================== -->
   <footer class="border-t border-garis/60 px-5 py-4 text-center text-xs leading-relaxed text-baja sm:px-8">
-    Akun bermasalah? Hubungi tim ICT di ruang server pada jam kerja.
+    2026 - ITC SMKN 1 Pogalan  |  Berdaya
   </footer>
 </div>
 
@@ -180,40 +183,26 @@ const SISTEM = [
     kode: "SIGAP",
     nama: "SIGAP",
     kepanjangan: "Sistem Informasi Gerbang Aman Pelajar",
-    ringkasan: "Ajukan izin keluar sekolah dan pantau persetujuannya.",
+    ringkasan: "",
     pengguna: ["Murid", "Wali kelas", "Guru piket", "Petugas gerbang"],
-    url: "#",
+    url: "https://smart.smkn1pogalan.sch.id/sigap",
     status: "aktif"
   },
   {
     kode: "LMS",
     nama: "LMS",
-    kepanjangan: "Ruang belajar daring",
-    ringkasan: "Buka materi, kumpulkan tugas, dan lihat nilai.",
+    kepanjangan: "Persiapan Tes Kenaikan Akademik (TKA)",
+    ringkasan: "",
     pengguna: ["Murid", "Guru"],
-    url: "#",
+    url: "https://smart.smkn1pogalan.sch.id/lms",
     status: "aktif"
   }
-
-  /* Contoh menambah layanan baru — hapus tanda komentar untuk memakainya:
-
-  ,{
-    kode: "PRESENSI",
-    nama: "Presensi",
-    kepanjangan: "Kehadiran harian",
-    ringkasan: "Rekap kehadiran murid dan guru setiap hari.",
-    pengguna: ["Murid", "Guru", "Tata usaha"],
-    url: "https://presensi.smkn1pogalan.sch.id",
-    status: "segera"
-  }
-
-  */
 ];
 
 const STATUS = {
-  aktif:     { label: "Siap dipakai",      warna: "text-aqua",     titik: "bg-aqua",     bisaDibuka: true  },
-  segera:    { label: "Segera hadir",      warna: "text-marigold", titik: "bg-marigold", bisaDibuka: false },
-  perbaikan: { label: "Sedang diperbaiki", warna: "text-baja",     titik: "bg-baja",     bisaDibuka: false }
+  aktif:     { label: "Online",      warna: "text-aqua",     titik: "bg-aqua",     bisaDibuka: true  },
+  segera:    { label: "Segera",      warna: "text-marigold", titik: "bg-marigold", bisaDibuka: false },
+  perbaikan: { label: "Maintenance", warna: "text-baja",     titik: "bg-baja",     bisaDibuka: false }
 };
 
 const daftar = document.getElementById("daftar-sistem");
