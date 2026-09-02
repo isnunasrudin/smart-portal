@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal SMART — SMK Negeri 1 Pogalan</title>
+<meta name="description" content="Pintu masuk ke seluruh sistem informasi SMK Negeri 1 Pogalan.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:      '#050910',
+          panel:    '#0B1421',
+          panel2:   '#101D2E',
+          garis:    '#1C2E44',
+          aqua:     '#4FE3D0',
+          biru:     '#4C9BFF',
+          marigold: '#F2A93B',
+          teks:     '#E7EFF7',
+          baja:     '#8199AF'
+        },
+        fontFamily: {
+          sans: ['Sora', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body { background: #050910; }
+  #latar { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  /* Kisi tombol menyesuaikan sendiri saat layanan bertambah */
+  .kisi-layanan {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.125rem;
+  }
+
+  /* --- pembukaan halaman, satu rangkaian --- */
+  @keyframes naik { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  .masuk { opacity: 0; animation: naik .65s cubic-bezier(.22,.68,.35,1) forwards; }
+
+  @keyframes denyut {
+    0%   { box-shadow: 0 0 0 0 currentColor; }
+    70%  { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  .denyut { animation: denyut 2.4s ease-out infinite; }
+
+  @keyframes pindai { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+  .pindai::after {
+    content: ''; position: absolute; inset: 0; width: 25%;
+    background: linear-gradient(90deg, transparent, #4FE3D0, transparent);
+    animation: pindai 5.5s linear infinite;
+  }
+
+  /* --- tombol layanan --- */
+  .tombol {
+    position: relative; overflow: hidden;
+    transition: transform .35s cubic-bezier(.22,.68,.35,1),
+                border-color .3s ease, box-shadow .35s ease, background-color .3s ease;
+  }
+  .tombol-aktif:hover, .tombol-aktif:focus-visible {
+    transform: translateY(-7px);
+    border-color: rgba(79,227,208,.6);
+    background-color: #101D2E;
+    box-shadow: 0 22px 50px -24px rgba(79,227,208,.65);
+  }
+  /* kilau menyapu sekali saat disorot */
+  .tombol::before {
+    content: ''; position: absolute; top: 0; left: -60%; width: 45%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(79,227,208,.12), transparent);
+    transition: left .7s cubic-bezier(.22,.68,.35,1);
+  }
+  .tombol-aktif:hover::before, .tombol-aktif:focus-visible::before { left: 130%; }
+
+  .plat { transition: background-color .3s ease, color .3s ease, transform .35s cubic-bezier(.22,.68,.35,1); }
+  .tombol-aktif:hover .plat { background-color: #4FE3D0; color: #050910; transform: translateY(-2px); }
+
+  .panah { transition: transform .35s cubic-bezier(.22,.68,.35,1), opacity .3s ease; opacity: .55; }
+  .tombol-aktif:hover .panah { transform: translateX(5px); opacity: 1; }
+
+  :focus-visible { outline: 2px solid #4FE3D0; outline-offset: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .masuk { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+
+<body class="font-sans text-teks antialiased selection:bg-aqua selection:text-ink">
+
+<canvas id="latar" aria-hidden="true"></canvas>
+
+<div class="relative z-10 flex min-h-screen flex-col">
+
+  <!-- ===================== BILAH ATAS ===================== -->
+  <div class="pindai relative h-px overflow-hidden bg-garis"></div>
+
+  <header class="border-b border-garis/60 bg-ink/60 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
+      <div class="flex items-center gap-3">
+        <span class="grid h-7 w-7 place-items-center bg-aqua font-mono text-[0.55rem] font-bold text-ink">S1P</span>
+        <span class="text-[0.8rem] font-medium tracking-tight text-baja">SMK Negeri 1 Pogalan</span>
+      </div>
+      <div class="flex items-center gap-5 font-mono text-[0.7rem] text-baja">
+        <span class="hidden items-center gap-2 sm:flex">
+          <span class="denyut h-1.5 w-1.5 rounded-full bg-aqua text-aqua"></span>Layanan normal
+        </span>
+        <span id="jam" class="tabular-nums text-teks">--:--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== PUSAT: TOMBOL LAYANAN ===================== -->
+  <main class="flex flex-1 items-center justify-center px-5 py-14 sm:px-8">
+    <div class="w-full max-w-3xl text-center">
+
+      <!-- Ganti kepanjangan SMART sesuai versi resmi sekolah. -->
+      <h1 id="wordmark"
+          class="masuk font-mono text-4xl font-bold tracking-tighter sm:text-5xl"
+          style="animation-delay:.05s">SMART</h1>
+
+      <p class="masuk mx-auto mt-4 max-w-md text-[0.95rem] leading-relaxed text-baja" style="animation-delay:.15s">
+        Pilih layanan yang kamu butuhkan, lalu masuk dengan akun sekolahmu.
+      </p>
+
+      <!-- Kolom pencarian tampil otomatis kalau layanan lebih dari 4. -->
+      <div id="wadah-cari" class="masuk mx-auto mt-8 hidden max-w-sm" style="animation-delay:.2s">
+        <label for="cari" class="sr-only">Cari layanan</label>
+        <input id="cari" type="search" autocomplete="off" placeholder="Cari layanan"
+               class="w-full border border-garis bg-panel px-4 py-2.5 text-center text-sm text-teks placeholder:text-baja/60 focus:border-aqua focus:outline-none">
+      </div>
+
+      <div id="daftar-sistem" class="kisi-layanan mt-10"></div>
+
+      <p id="kosong" class="mt-10 hidden border border-dashed border-garis px-6 py-12 text-sm text-baja">
+        Tidak ada layanan yang cocok. Coba kata kunci lain.
+      </p>
+
+    </div>
+  </main>
+
+  <!-- ===================== KAKI ===================== -->
+  <footer class="border-t border-garis/60 px-5 py-4 text-center text-xs leading-relaxed text-baja sm:px-8">
+    Akun bermasalah? Hubungi tim ICT di ruang server pada jam kerja.
+  </footer>
+</div>
+
+<script>
+/* ==========================================================================
+   DAFTAR SISTEM
+   --------------------------------------------------------------------------
+   Menambah layanan baru = tambah satu objek di array ini. HTML dan CSS tidak
+   perlu disentuh; kisi tombolnya menyusun ulang sendiri. Salin blok contoh
+   di bagian bawah array.
+
+   kode        : singkatan pada plat, 3–8 huruf agar muat
+   nama        : nama yang dikenal warga sekolah
+   kepanjangan : kepanjangan singkatan, isi "" kalau tidak ada
+   ringkasan   : satu kalimat pendek, tampil di dalam tombol
+   pengguna    : siapa saja yang memakai (dipakai juga untuk pencarian)
+   url         : alamat sistem
+   status      : "aktif" | "segera" | "perbaikan"
+   ========================================================================== */
+
+const SISTEM = [
+  {
+    kode: "SIGAP",
+    nama: "SIGAP",
+    kepanjangan: "Sistem Informasi Gerbang Aman Pelajar",
+    ringkasan: "Ajukan izin keluar sekolah dan pantau persetujuannya.",
+    pengguna: ["Murid", "Wali kelas", "Guru piket", "Petugas gerbang"],
+    url: "#",
+    status: "aktif"
+  },
+  {
+    kode: "LMS",
+    nama: "LMS",
+    kepanjangan: "Ruang belajar daring",
+    ringkasan: "Buka materi, kumpulkan tugas, dan lihat nilai.",
+    pengguna: ["Murid", "Guru"],
+    url: "#",
+    status: "aktif"
+  }
+
+  /* Contoh menambah layanan baru — hapus tanda komentar untuk memakainya:
+
+  ,{
+    kode: "PRESENSI",
+    nama: "Presensi",
+    kepanjangan: "Kehadiran harian",
+    ringkasan: "Rekap kehadiran murid dan guru setiap hari.",
+    pengguna: ["Murid", "Guru", "Tata usaha"],
+    url: "https://presensi.smkn1pogalan.sch.id",
+    status: "segera"
+  }
+
+  */
+];
+
+const STATUS = {
+  aktif:     { label: "Siap dipakai",      warna: "text-aqua",     titik: "bg-aqua",     bisaDibuka: true  },
+  segera:    { label: "Segera hadir",      warna: "text-marigold", titik: "bg-marigold", bisaDibuka: false },
+  perbaikan: { label: "Sedang diperbaiki", warna: "text-baja",     titik: "bg-baja",     bisaDibuka: false }
+};
+
+const daftar = document.getElementById("daftar-sistem");
+const kosong = document.getElementById("kosong");
+const cari   = document.getElementById("cari");
+const diamSaja = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function buatTombol(s, urutan) {
+  const st   = STATUS[s.status] || STATUS.aktif;
+  const bisa = st.bisaDibuka && s.url && s.url !== "#";
+
+  const el = document.createElement(bisa ? "a" : "div");
+  if (bisa) { el.href = s.url; el.rel = "noopener"; el.setAttribute("aria-label", "Buka " + s.nama); }
+
+  el.className = "tombol masuk flex flex-col items-center border border-garis bg-panel px-6 py-8 text-center "
+               + (bisa ? "tombol-aktif" : "opacity-60");
+  el.style.animationDelay = (0.3 + urutan * 0.09) + "s";
+
+  el.innerHTML = `
+    <span class="plat grid h-14 w-14 place-items-center bg-panel2 font-mono text-[0.62rem] font-bold tracking-wider text-aqua">
+      ${s.kode}
+    </span>
+
+    <h2 class="mt-5 text-lg font-semibold tracking-tight">${s.nama}</h2>
+    ${s.kepanjangan ? `<p class="mt-1.5 text-xs leading-relaxed text-baja">${s.kepanjangan}</p>` : ""}
+    <p class="mt-3 text-[0.85rem] leading-relaxed text-baja">${s.ringkasan}</p>
+
+    <span class="mt-6 inline-flex items-center gap-2 font-mono text-[0.65rem] ${st.warna}">
+      <span class="${st.titik} ${bisa ? "denyut" : ""} h-1.5 w-1.5 rounded-full" style="color:currentColor"></span>${st.label}
+    </span>
+
+    ${bisa ? `<span class="mt-5 inline-flex items-center gap-2 text-sm font-medium">
+                Buka
+                <svg class="panah" width="16" height="9" viewBox="0 0 16 9" fill="none" aria-hidden="true">
+                  <path d="M0 4.5h14M10 1l4 3.5L10 8" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </span>` : ""}
+  `;
+  return el;
+}
+
+function tampilkan(kunci = "") {
+  const q = kunci.trim().toLowerCase();
+  const hasil = SISTEM.filter(s =>
+    [s.kode, s.nama, s.kepanjangan, s.ringkasan, s.pengguna.join(" ")]
+      .join(" ").toLowerCase().includes(q)
+  );
+
+  daftar.replaceChildren();
+  hasil.forEach((s, i) => daftar.appendChild(buatTombol(s, i)));
+  kosong.classList.toggle("hidden", hasil.length > 0);
+}
+
+tampilkan();
+
+if (SISTEM.length > 4) {
+  document.getElementById("wadah-cari").classList.remove("hidden");
+  cari.addEventListener("input", e => tampilkan(e.target.value));
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && document.activeElement !== cari) { e.preventDefault(); cari.focus(); }
+  });
+}
+
+/* ------------------------- Wordmark terurai jadi jelas ------------------- */
+
+const wordmark = document.getElementById("wordmark");
+const kataAsli = wordmark.textContent;
+
+if (!diamSaja) {
+  const acak = "01#/<>\\[]{}=+*ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let bingkai = 0;
+  const perHuruf = 5;
+  const urai = setInterval(() => {
+    let keluar = "";
+    for (let i = 0; i < kataAsli.length; i++) {
+      keluar += (bingkai / perHuruf > i) ? kataAsli[i] : acak[Math.floor(Math.random() * acak.length)];
+    }
+    wordmark.textContent = keluar;
+    if (bingkai / perHuruf > kataAsli.length) { wordmark.textContent = kataAsli; clearInterval(urai); }
+    bingkai++;
+  }, 45);
+}
+
+/* --------------------------------- Jam ---------------------------------- */
+
+const elJam = document.getElementById("jam");
+function perbaruiJam() {
+  elJam.textContent = new Date().toLocaleTimeString("id-ID", {
+    timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit"
+  });
+}
+perbaruiJam();
+setInterval(perbaruiJam, 1000);
+
+/* ----------------- Latar: kisi jaringan dan paket data ------------------- */
+
+(function latar() {
+  const kanvas = document.getElementById("latar");
+  const ktx = kanvas.getContext("2d");
+  const JARAK = 64;
+  let l = 0, t = 0, paket = [];
+
+  function ukur() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    l = window.innerWidth; t = window.innerHeight;
+    kanvas.width = l * dpr; kanvas.height = t * dpr;
+    kanvas.style.width = l + "px"; kanvas.style.height = t + "px";
+    ktx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    paket = Array.from({ length: l < 640 ? 6 : 12 }, buatPaket);
+    if (diamSaja) { ktx.clearRect(0, 0, l, t); kisi(); }
+  }
+
+  function buatPaket() {
+    const tegak = Math.random() > 0.5;
+    return {
+      tegak,
+      jalur: Math.floor(Math.random() * ((tegak ? l : t) / JARAK)) * JARAK,
+      maju: Math.random() * (tegak ? t : l),
+      laju: 0.4 + Math.random() * 1.1,
+      ekor: 70 + Math.random() * 130,
+      warna: Math.random() > 0.75 ? "242,169,59" : "79,227,208"
+    };
+  }
+
+  function kisi() {
+    ktx.lineWidth = 1;
+    ktx.strokeStyle = "rgba(79,227,208,0.045)";
+    ktx.beginPath();
+    for (let x = 0; x <= l; x += JARAK) { ktx.moveTo(x + .5, 0); ktx.lineTo(x + .5, t); }
+    for (let y = 0; y <= t; y += JARAK) { ktx.moveTo(0, y + .5); ktx.lineTo(l, y + .5); }
+    ktx.stroke();
+  }
+
+  function gambarPaket(p) {
+    const x1 = p.tegak ? p.jalur + .5 : p.maju;
+    const y1 = p.tegak ? p.maju : p.jalur + .5;
+    const x2 = p.tegak ? x1 : p.maju - p.ekor;
+    const y2 = p.tegak ? p.maju - p.ekor : y1;
+    const grad = ktx.createLinearGradient(x1, y1, x2, y2);
+    grad.addColorStop(0, `rgba(${p.warna},0.85)`);
+    grad.addColorStop(1, `rgba(${p.warna},0)`);
+    ktx.strokeStyle = grad; ktx.lineWidth = 1.6;
+    ktx.beginPath(); ktx.moveTo(x1, y1); ktx.lineTo(x2, y2); ktx.stroke();
+  }
+
+  function bingkai() {
+    ktx.clearRect(0, 0, l, t);
+    kisi();
+    paket.forEach((p, i) => {
+      gambarPaket(p);
+      p.maju += p.laju;
+      if (p.maju - p.ekor > (p.tegak ? t : l)) paket[i] = buatPaket();
+    });
+    requestAnimationFrame(bingkai);
+  }
+
+  ukur();
+  window.addEventListener("resize", ukur);
+  if (!diamSaja) bingkai();
+})();
+</script>
+</body>
+</html>
